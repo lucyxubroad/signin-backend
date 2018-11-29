@@ -16,24 +16,57 @@ Backend Implementation for Confessions iOS App
       "score": 0,
       "text": "My First Post!",
       "username": "Young",
+      "longitude": 42.453449,
+      "latitude": -76.473503
     },
     {
       "id": 1,
       "score": 0,
       "text": "My Second Post!",
       "username": "Young",
+      "longitude": -76.473503,
+      "latitude": -76.473503
     }
   ]
 }
 ```
 
-## 2. Create a post: POST /api/posts
+## 2. Get all posts near location: GET /api/posts/long={longitude}&lat={latitude}/
+
+### Response on Success
+```
+{
+  "success": True,
+  "data": [
+    {
+      "id" 0,
+      "score": 0,
+      "text": "My First Post!",
+      "username": "Young",
+      "longitude": <NEARBY LOCATION LONGITUDE>,
+      "latitude": <NEARBY LOCATION LATITUDE>
+    },
+    {
+      "id": 1,
+      "score": 0,
+      "text": "My Second Post!",
+      "username": "Young",
+      "longitude": <NEARBY LOCATION LONGITUDE>,
+      "latitude": <NEARBY LOCATION LATITUDE>
+    }
+  ]
+}
+```
+
+## 3. Create a post: POST /api/posts
 
 ### Post Body
 ```
 {
   "text": <USER INPUT>,
   "username": <USER INPUT>,
+  "longitude": <USER INPUT>,
+  "latitude": <USER INPUT>
 }
 ```
 
@@ -46,11 +79,13 @@ Backend Implementation for Confessions iOS App
     "score": 0,
     "text": <USER INPUT FOR TEXT>,
     "username": <USER INPUT FOR USERNAME>,
+    "longitude": -76.473503,
+    "latitude": -76.473503
   }
 }
 ```
 
-## 3. Get a specific post: GET /api/post/{id}/
+## 4. Get a specific post: GET /api/post/{id}/
 ### Response on Success
 ```
 {
@@ -59,7 +94,7 @@ Backend Implementation for Confessions iOS App
 } 
 ```
 
-## 4. Get comments for post: GET /api/post/{id}/comments/
+## 5. Get comments for post: GET /api/post/{id}/comments/
 ### Response on Success
 ```
 {
@@ -76,7 +111,7 @@ Backend Implementation for Confessions iOS App
 }
 ```
 
-## 5. Post a comment: POST /api/post/{id}/comment/
+## 6. Post a comment: POST /api/post/{id}/comment/
 ### Post Body
 ```
 {
@@ -98,7 +133,7 @@ Backend Implementation for Confessions iOS App
 }
 ```
 
-## 6. Like a post: POST /api/post/{id}/vote/
+## 7. Like a post: POST /api/post/{id}/vote/
 ### Post Body
 ```
 {
@@ -113,7 +148,7 @@ Backend Implementation for Confessions iOS App
   "data": <POST WITH ID {id} WHERE THE SCORE IS ADJUSTED ACCORDINGLY>
 } 
 ```
-## 7. Like a comment  POST /api/comment/{id}/vote/
+## 8. Like a comment  POST /api/comment/{id}/vote/
 ### Post Body
 ```
 {
