@@ -2,6 +2,7 @@ import json
 from db import db, Post, Comment, User
 from flask import Flask, request
 
+from math import sin, cos, sqrt, atan2, radians
 import users_dao
 
 db_filename = "confessions.db"
@@ -29,6 +30,19 @@ def extract_token(request):
 
   return True, bearer_token
 
+def get_distance(long1, lat1, long2, lat2):
+  R = 6373.0
+  lat1 = radians(lat1)
+  long1 = radians(long1)
+  lat2 = radians(lat2)
+  long2 = radians(long2)
+  dlat = lat2 - lat1
+  dlong = long2 - long1
+  a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlong / 2)**2
+  c = 2 * atan2(sqrt(a), sqrt(1 - a))
+  distance = R * c
+  return distance
+
 @app.route('/')
 def hello():
   return 'Hello World!'
@@ -40,15 +54,16 @@ def get_posts():
   res = {'success': True, 'data': [post.serialize() for post in posts]}
   return json.dumps(res), 200
 
-@app.route('/api/posts/long=<float:long>&lat=<float:lat>/')
+@app.route('/api/posts/long=<string:long>&lat=<string:lat>/')
 def get_post_by_location(long, lat):
   """Retrieves list of posts made in location vicinity."""
+  long = float(long)
+  lat = float(lat)
   posts = Post.query.all()
   response_body = []
   for post in posts:
-    longitude_diff = abs(post.longitude - long)
-    latitude_diff = abs(post.latitude - lat)
-    if (latitude_diff < 1000) and (longitude_diff < 1000):
+    distance = get_distance(long, post.longitude, lat, post.latitude)
+    if distance < 1000:
       response_body.append(post.serialize())
   res = res = {'success': True, 'data': response_body}
   return json.dumps(res), 200
@@ -171,7 +186,9 @@ def register_account():
     return json.dumps({
         'session_token': user.session_token,
         'session_expiration': str(user.session_expiration),
-        'update_token': user.update_token
+        'update_token': user.update_token,
+        'user_id': user.id,
+        'photo_id': user.id%5
     })
 
 @app.route('/login/', methods=['POST'])
@@ -191,7 +208,9 @@ def login():
     return json.dumps({
         'session_token': user.session_token,
         'session_expiration': str(user.session_expiration),
-        'update_token': user.update_token
+        'update_token': user.update_token,
+        'user_id': user.id,
+        'photo_id': user.id%5
     })
 
 @app.route('/session/', methods=['POST'])
@@ -209,7 +228,9 @@ def update_session():
     return json.dumps({
         'session_token': user.session_token,
         'session_expiration': str(user.session_expiration),
-        'update_token': user.update_token
+        'update_token': user.update_token,
+        'user_id': user.id,
+        'photo_id': user.id%5
     })
 
 @app.route('/secret/', methods=['GET'])
