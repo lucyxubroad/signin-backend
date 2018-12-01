@@ -3,9 +3,10 @@ from db import db, Post, Comment, User
 from flask import Flask, request
 
 from math import sin, cos, sqrt, atan2, radians
+import datetime
 import users_dao
 
-db_filename = "confessions.db"
+db_filename = "confessions2.db"
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_filename
@@ -43,6 +44,13 @@ def get_distance(long1, lat1, long2, lat2):
   distance = R * c
   return distance
 
+def get_time_diff(time_beg):
+  time_now = datetime.datetime.now()
+  elapsedTime = time_now - time_beg
+  time_difference_in_minutes = elapsedTime / datetime.timedelta(minutes=1)
+  print(time_difference_in_minutes)
+  return (time_difference_in_minutes < 1440)
+
 @app.route('/')
 def hello():
   return 'Hello World!'
@@ -63,7 +71,10 @@ def get_post_by_location(long, lat):
   response_body = []
   for post in posts:
     distance = get_distance(long, post.longitude, lat, post.latitude)
-    if distance < 1000:
+    time_expired = get_time_diff(post.time_created)
+    print(time_expired)
+    print(distance)
+    if (distance < 5000 and time_expired):
       response_body.append(post.serialize())
   res = res = {'success': True, 'data': response_body}
   return json.dumps(res), 200

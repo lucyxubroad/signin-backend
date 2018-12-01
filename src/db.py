@@ -14,6 +14,7 @@ class Post(db.Model):
     username = db.Column(db.String, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
+    time_created = db.Column(db.DateTime, nullable=False)
     comments = db.relationship('Comment', cascade='delete')
 
     def __init__(self, **kwargs):
@@ -22,6 +23,7 @@ class Post(db.Model):
         self.score = kwargs.get('score', 0)
         self.longitude = kwargs.get('longitude', 0)
         self.latitude = kwargs.get('latitude', 0)
+        self.time_created = datetime.datetime.now() 
         
     def serialize(self):
         return {
@@ -30,7 +32,7 @@ class Post(db.Model):
             'text': self.text,
             'username': self.username,
             'longitude': self.longitude,
-            'latitude': self.latitude
+            'latitude': self.latitude,
         }
 
 class Comment(db.Model):
