@@ -176,7 +176,8 @@ Backend Implementation for Confessions iOS App
 {
   "session_token": "WdLiluxxZVkPUHsoqnfcQ1YpARuj9Z7or3COA4HNNAv" ,
   "session_expiration": "2018-11-06 21:12:54.851118" ,
-  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a"
+  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a",
+  "user_id": 0
 } 
 ```
 
@@ -194,7 +195,8 @@ Backend Implementation for Confessions iOS App
 {
   "session_token": "WdLiluxxZVkPUHsoqnfcQ1YpARuj9Z7or3COA4HNNAv" ,
   "session_expiration": "2018-11-06 21:12:54.851118" ,
-  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a"
+  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a",
+  "user_id": 0
 } 
 ```
 
