@@ -202,7 +202,7 @@ Backend Implementation for Confessions iOS App
 } 
 ```
 
-### 11. Check user session GET /secret/
+## 11. Check user session GET /secret/
 
 ### Response on Success
 ```
