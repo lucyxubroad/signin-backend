@@ -162,3 +162,42 @@ Backend Implementation for Confessions iOS App
   "data": <COMMENT WITH ID {id} WHERE THE SCORE IS ADJUSTED ACCORDINGLY>
 } 
 ```
+
+## 9. Register a user  POST /register
+### Post Body
+```
+{
+  "email": "email@gmail.com",
+  "password": "password"
+}
+```
+### Response on Success
+```
+{
+  "session_token": "WdLiluxxZVkPUHsoqnfcQ1YpARuj9Z7or3COA4HNNAv" ,
+  "session_expiration": "2018-11-06 21:12:54.851118" ,
+  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a"
+} 
+```
+
+
+## 10. Login a user  POST /login
+### Post Body
+```
+{
+  "email": "email@gmail.com",
+  "password": "password"
+}
+```
+### Response on Success
+```
+{
+  "session_token": "WdLiluxxZVkPUHsoqnfcQ1YpARuj9Z7or3COA4HNNAv" ,
+  "session_expiration": "2018-11-06 21:12:54.851118" ,
+  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a"
+} 
+```
+
+
+
+
