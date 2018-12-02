@@ -12,19 +12,21 @@ Backend Implementation for Confessions iOS App
   "success": True,
   "data": [
     {
-      "id" 0,
-      "score": 0,
-      "text": "My First Post!",
-      "username": "Young",
-      "longitude": 42.453449,
+      "id": 1, 
+      "score": 0, 
+      "text": "hola", 
+      "comment_count": 0, 
+      "username": "random", 
+      "longitude": -42.453449, 
       "latitude": -76.473503
     },
     {
-      "id": 1,
-      "score": 0,
-      "text": "My Second Post!",
-      "username": "Young",
-      "longitude": -76.473503,
+      "id": 2, 
+      "score": 0, 
+      "text": "hola", 
+      "comment_count": 0, 
+      "username": "random", 
+      "longitude": -45.453449, 
       "latitude": -76.473503
     }
   ]
@@ -42,7 +44,8 @@ Backend Implementation for Confessions iOS App
       "id" 0,
       "score": 0,
       "text": "My First Post!",
-      "username": "Young",
+      "comment_count": 0,
+      "username": "Lucy",
       "longitude": <NEARBY LOCATION LONGITUDE>,
       "latitude": <NEARBY LOCATION LATITUDE>
     },
@@ -50,7 +53,8 @@ Backend Implementation for Confessions iOS App
       "id": 1,
       "score": 0,
       "text": "My Second Post!",
-      "username": "Young",
+      "comment_count": 0,
+      "username": "Lucy",
       "longitude": <NEARBY LOCATION LONGITUDE>,
       "latitude": <NEARBY LOCATION LATITUDE>
     }
@@ -77,10 +81,11 @@ Backend Implementation for Confessions iOS App
   "data": {
     "id": <ID>
     "score": 0,
+    "comment_count": 0,
     "text": <USER INPUT FOR TEXT>,
     "username": <USER INPUT FOR USERNAME>,
-    "longitude": -76.473503,
-    "latitude": -76.473503
+    "longitude": <USER INPUT FOR LONGITUDE>,
+    "latitude": <USER INPUT FOR LATITUDE>
   }
 }
 ```
