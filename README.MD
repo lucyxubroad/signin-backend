@@ -207,7 +207,27 @@ Backend Implementation for Confessions iOS App
 } 
 ```
 
-## 11. Check user session GET /secret/
+## 11. Renew user session POST /session/
+
+### Response on Success
+```
+{
+  "session_token": "WdLiluxxZVkPUHsoqnfcQ1YpARuj9Z7or3COA4HNNAv" ,
+  "session_expiration": "2018-11-06 21:12:54.851118" ,
+  "update_token": "7fd15938c823cf58e78019bea2af142f9449696a",
+  "user_id": 0,
+  "photo_id": 0
+} 
+```
+
+### Response on Failure
+```
+{
+  "error": "Invalid update token.'"
+} 
+```
+
+## 12. Check user session GET /secret/
 
 ### Response on Success
 ```
