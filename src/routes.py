@@ -136,24 +136,6 @@ def get_comments(post_id):
     return json.dumps({'success': True, 'data': comments}), 200
   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
-@app.route('/api/post/<int:post_id>/comment/', methods=['POST'])
-def post_comment(post_id):
-  """Append new comment to a post."""
-  post_body = json.loads(request.data)
-  post = Post.query.filter_by(id=post_id).first()
-  if post is not None and 'username' in post_body and 'text' in post_body:
-    comment = Comment(
-      text = post_body.get('text'),
-      username = post_body.get('username'),
-      post_id=post.id
-    )
-    post.comment_count = post.comment_count + 1 
-    post.comments.append(comment)
-    db.session.add(comment)
-    db.session.commit()
-    return json.dumps({'success': True, 'data': comment.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Post not found!'}), 404
-
 @app.route('/api/post/<int:post_id>/vote/', methods=['POST'])
 def vote_post(post_id):
   """Vote on a post."""
@@ -168,18 +150,24 @@ def vote_post(post_id):
     return json.dumps({'success': True, 'data': post.serialize()}), 200
   return json.dumps({'success': False, 'error': 'Invalid post!'}), 404
 
-@app.route('/api/comment/<int:comment_id>/vote/', methods=['POST'])
-def vote_comment(comment_id):
+
+@app.route('/api/post/<int:post_id>/comment/', methods=['POST'])
+def comment_post(post_id):
+  """Vote on a post."""
   post_body = json.loads(request.data)
-  comment = Comment.query.filter_by(id=comment_id).first()
-  if comment is not None:
-    if post_body['vote'] or 'vote' not in post_body:
-      comment.score = comment.score + 1
-    else:
-      comment.score = comment.score - 1
+  post = Post.query.filter_by(id=post_id).first()
+  if post is not None:
+    comment = Comment(
+      text = post_body['text'],
+      username = post_body['username'],
+      post_id=post.id
+    )
+    post.comment_count = post.comment_count + 1
+    post.comments.append(comment)
+    db.session.add(comment)
     db.session.commit()
-    return json.dumps({'success': True, 'data': comment.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Invalid comment!'}), 404
+    return json.dumps({'success': True, 'data': post.serialize()}), 200
+  return json.dumps({'success': False, 'error': 'Invalid post!'}), 404
 
 @app.route('/register/', methods=['POST'])
 def register_account():
