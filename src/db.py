@@ -10,6 +10,7 @@ class Post(db.Model):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
     score = db.Column(db.Integer, nullable=False)
+    comment_count = db.Column(db.Integer, nullable=False)
     text = db.Column(db.String, nullable=False)
     username = db.Column(db.String, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
@@ -21,6 +22,7 @@ class Post(db.Model):
         self.text = kwargs.get('text', '')
         self.username = kwargs.get('username', '')
         self.score = kwargs.get('score', 0)
+        self.comment_count = kwargs.get('comment_count', 0)
         self.longitude = kwargs.get('longitude', 0)
         self.latitude = kwargs.get('latitude', 0)
         self.time_created = datetime.datetime.now() 
@@ -30,6 +32,7 @@ class Post(db.Model):
             'id': self.id,
             'score': self.score,
             'text': self.text,
+            'comment_count': self.comment_count,
             'username': self.username,
             'longitude': self.longitude,
             'latitude': self.latitude,

@@ -6,7 +6,7 @@ from math import sin, cos, sqrt, atan2, radians
 import datetime
 import users_dao
 
-db_filename = "confessions2.db"
+db_filename = "confessions3.db"
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_filename
@@ -147,6 +147,7 @@ def post_comment(post_id):
       username = post_body.get('username'),
       post_id=post.id
     )
+    post.comment_count = post.comment_count + 1 
     post.comments.append(comment)
     db.session.add(comment)
     db.session.commit()
