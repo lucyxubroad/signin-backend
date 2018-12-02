@@ -168,7 +168,7 @@ Backend Implementation for Confessions iOS App
 } 
 ```
 
-## 9. Register a user  POST /register
+## 9. Register a user  POST /register/
 ### Post Body
 ```
 {
@@ -188,7 +188,7 @@ Backend Implementation for Confessions iOS App
 ```
 
 
-## 10. Login a user  POST /login
+## 10. Login a user  POST /login/
 ### Post Body
 ```
 {
