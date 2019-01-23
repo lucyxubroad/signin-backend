@@ -61,6 +61,8 @@ class Comment(db.Model):
             'post_id': self.post_id
         }
 
+
+# LUCY: Keep User table for Sign Ins (revisit details later)
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)

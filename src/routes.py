@@ -6,7 +6,7 @@ from math import sin, cos, sqrt, atan2, radians
 import datetime
 import users_dao
 
-db_filename = "confessions3.db"
+db_filename = "signin.db"
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_filename
@@ -18,7 +18,7 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     
-
+# LUCY: Need this for supporting users. Revisit details later.
 def extract_token(request):
   auth_header = request.headers.get('Authorization')
   if auth_header is None:
@@ -31,30 +31,11 @@ def extract_token(request):
 
   return True, bearer_token
 
-def get_distance(long1, lat1, long2, lat2):
-  R = 6373.0
-  lat1 = radians(lat1)
-  long1 = radians(long1)
-  lat2 = radians(lat2)
-  long2 = radians(long2)
-  dlat = lat2 - lat1
-  dlong = long2 - long1
-  a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlong / 2)**2
-  c = 2 * atan2(sqrt(a), sqrt(1 - a))
-  distance = R * c
-  return distance
-
-def get_time_diff(time_beg):
-  time_now = datetime.datetime.now()
-  elapsedTime = time_now - time_beg
-  time_difference_in_minutes = elapsedTime / datetime.timedelta(minutes=1)
-  print(time_difference_in_minutes)
-  return (time_difference_in_minutes < 1440)
-
 @app.route('/')
 def hello():
   return 'Hello World!'
 
+# LUCY: Repurpose to support events
 @app.route('/api/posts/')
 def get_posts():
   """Retrieves list of all posts."""
@@ -62,23 +43,7 @@ def get_posts():
   res = {'success': True, 'data': [post.serialize() for post in posts]}
   return json.dumps(res), 200
 
-@app.route('/api/posts/long=<string:long>&lat=<string:lat>/')
-def get_post_by_location(long, lat):
-  """Retrieves list of posts made in location vicinity."""
-  long = float(long)
-  lat = float(lat)
-  posts = Post.query.all()
-  response_body = []
-  for post in posts:
-    distance = get_distance(long, post.longitude, lat, post.latitude)
-    time_expired = get_time_diff(post.time_created)
-    print(time_expired)
-    print(distance)
-    if (distance < 5000 and time_expired):
-      response_body.append(post.serialize())
-  res = res = {'success': True, 'data': response_body}
-  return json.dumps(res), 200
-
+# LUCY: Repurpose to support events
 @app.route('/api/posts/', methods=['POST'])
 def create_post():
   """Append new post to list."""
@@ -95,6 +60,7 @@ def create_post():
     return json.dumps({'success': True, 'data': post.serialize()}), 200
   return json.dumps({'success': False, 'error': 'Invalid POST body!'}), 404
 
+# LUCY: Repurpose to support events
 @app.route('/api/post/<int:post_id>/')
 def get_post(post_id):
   """Retrieve specific post in post list."""
@@ -103,7 +69,7 @@ def get_post(post_id):
     return json.dumps({'success': True, 'data': post.serialize()}), 200
   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
-
+# LUCY: Repurpose to support events
 @app.route('/api/post/<int:post_id>/', methods=['POST'])
 def edit_post(post_id):
   """Update specific post with new post"""
@@ -117,6 +83,7 @@ def edit_post(post_id):
     return json.dumps({'success': True, 'data': post.serialize()}), 200
   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
+# LUCY: Repurpose to support events
 @app.route('/api/post/<int:post_id>/', methods=['DELETE'])
 def delete_post(post_id):
   """Remove specific post in post list."""
@@ -127,48 +94,7 @@ def delete_post(post_id):
     return json.dumps({'success': True, 'data': post.serialize()}), 200
   return json.dumps({'success': False, 'error': 'Post not found!'}), 404 
 
-@app.route('/api/post/<int:post_id>/comments/')
-def get_comments(post_id):
-  """Retrieve all comments for specific post."""
-  post = Post.query.filter_by(id=post_id).first()
-  if post is not None:
-    comments = [comment.serialize() for comment in post.comments]
-    return json.dumps({'success': True, 'data': comments}), 200
-  return json.dumps({'success': False, 'error': 'Post not found!'}), 404
-
-@app.route('/api/post/<int:post_id>/vote/', methods=['POST'])
-def vote_post(post_id):
-  """Vote on a post."""
-  post_body = json.loads(request.data)
-  post = Post.query.filter_by(id=post_id).first()
-  if post is not None:
-    if post_body['vote'] or 'vote' not in post_body:
-      post.score = post.score + 1
-    else:
-      post.score = post.score - 1
-    db.session.commit()
-    return json.dumps({'success': True, 'data': post.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Invalid post!'}), 404
-
-
-@app.route('/api/post/<int:post_id>/comment/', methods=['POST'])
-def comment_post(post_id):
-  """Vote on a post."""
-  post_body = json.loads(request.data)
-  post = Post.query.filter_by(id=post_id).first()
-  if post is not None:
-    comment = Comment(
-      text = post_body['text'],
-      username = post_body['username'],
-      post_id=post.id
-    )
-    post.comment_count = post.comment_count + 1
-    post.comments.append(comment)
-    db.session.add(comment)
-    db.session.commit()
-    return json.dumps({'success': True, 'data': post.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Invalid post!'}), 404
-
+# LUCY: Need this for supporting users. Revisit details later.
 @app.route('/register/', methods=['POST'])
 def register_account():
     post_body = json.loads(request.data)
@@ -191,6 +117,7 @@ def register_account():
         'photo_id': user.id%5
     })
 
+# LUCY: Need this for supporting users. Revisit details later.
 @app.route('/login/', methods=['POST'])
 def login():
     post_body = json.loads(request.data)
@@ -213,6 +140,7 @@ def login():
         'photo_id': user.id%5
     })
 
+# LUCY: Need this for supporting users. Revisit details later.
 @app.route('/session/', methods=['POST'])
 def update_session():
     success, update_token = extract_token(request)
@@ -233,6 +161,7 @@ def update_session():
         'photo_id': user.id%5
     })
 
+# LUCY: Need this for supporting users. Revisit details later.
 @app.route('/secret/', methods=['GET'])
 def secret_message():
     success, session_token = extract_token(request)
