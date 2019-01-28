@@ -6,61 +6,28 @@ import os
 
 db = SQLAlchemy()
 
-class Post(db.Model):
-    __tablename__ = 'post'
+class Event(db.Model):
+    __tablename__ = 'event'
     id = db.Column(db.Integer, primary_key=True)
-    score = db.Column(db.Integer, nullable=False)
-    comment_count = db.Column(db.Integer, nullable=False)
-    text = db.Column(db.String, nullable=False)
-    username = db.Column(db.String, nullable=False)
-    longitude = db.Column(db.Float, nullable=False)
-    latitude = db.Column(db.Float, nullable=False)
-    time_created = db.Column(db.DateTime, nullable=False)
-    comments = db.relationship('Comment', cascade='delete')
+    event = db.Column(db.String, nullable=False)
+    club = db.Column(db.String, nullable=False)
+    location = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=False)
 
     def __init__(self, **kwargs):
-        self.text = kwargs.get('text', '')
-        self.username = kwargs.get('username', '')
-        self.score = kwargs.get('score', 0)
-        self.comment_count = kwargs.get('comment_count', 0)
-        self.longitude = kwargs.get('longitude', 0)
-        self.latitude = kwargs.get('latitude', 0)
-        self.time_created = datetime.datetime.now() 
+        self.event = kwargs.get('event', '')
+        self.club = kwargs.get('club', '')
+        self.location = kwargs.get('location', '')
+        self.description = kwargs.get('description', '')
         
     def serialize(self):
         return {
             'id': self.id,
-            'score': self.score,
-            'text': self.text,
-            'comment_count': self.comment_count,
-            'username': self.username,
-            'longitude': self.longitude,
-            'latitude': self.latitude,
+            'event': self.event,
+            'club': self.club,
+            'location': self.location,
+            'description': self.description
         }
-
-class Comment(db.Model):
-    __tablename__ = 'comment'
-    id = db.Column(db.Integer, primary_key=True)
-    score = db.Column(db.Integer, nullable=False)
-    text = db.Column(db.String, nullable=False)
-    username = db.Column(db.String, nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-
-    def __init__(self, **kwargs):
-        self.text = kwargs.get('text', '')
-        self.username = kwargs.get('username', '')
-        self.score = kwargs.get('score', 0)
-        self.post_id = kwargs.get('post_id')
-
-    def serialize(self):
-        return {
-            'id': self.id,
-            'score': self.score,
-            'text': self.text,
-            'username': self.username,
-            'post_id': self.post_id
-        }
-
 
 # LUCY: Keep User table for Sign Ins (revisit details later)
 class User(db.Model):
@@ -68,6 +35,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     # User information
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
     password_digest = db.Column(db.String, nullable=False)
 
@@ -78,6 +47,8 @@ class User(db.Model):
 
     def __init__(self, **kwargs):
         self.email = kwargs.get('email')
+        self.last_name = kwargs.get('last_name')
+        self.first_name = kwargs.get('first_name')
         self.password_digest = bcrypt.hashpw(kwargs.get('password').encode('utf8'),
                                             bcrypt.gensalt(rounds=13))
         self.renew_session()

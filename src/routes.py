@@ -1,12 +1,10 @@
 import json
-from db import db, Post, Comment, User
+from db import db, User, Event
 from flask import Flask, request
 
-from math import sin, cos, sqrt, atan2, radians
-import datetime
 import users_dao
 
-db_filename = "signin.db"
+db_filename = "signin2.db"
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_filename
@@ -35,64 +33,58 @@ def extract_token(request):
 def hello():
   return 'Hello World!'
 
-# LUCY: Repurpose to support events
-@app.route('/api/posts/')
-def get_posts():
-  """Retrieves list of all posts."""
-  posts = Post.query.all()
-  res = {'success': True, 'data': [post.serialize() for post in posts]}
+@app.route('/api/events/')
+def get_events():
+  events = Event.query.all()
+  res = {'success': True, 'data': [event.serialize() for event in events]}
   return json.dumps(res), 200
 
-# LUCY: Repurpose to support events
-@app.route('/api/posts/', methods=['POST'])
-def create_post():
-  """Append new post to list."""
+@app.route('/api/events/', methods=['POST'])
+def create_event():
   post_body = json.loads(request.data)
-  if 'username' in post_body and 'text' in post_body:
-    post = Post (
-      text = post_body.get('text'),
-      username = post_body.get('username'),
-      longitude = post_body.get('longitude'),
-      latitude = post_body.get('latitude')
-    )
-    db.session.add(post)
-    db.session.commit()
-    return json.dumps({'success': True, 'data': post.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Invalid POST body!'}), 404
+  event = Event (
+    event = post_body.get('event'),
+    club = post_body.get('club'),
+    location = post_body.get('location'),
+    description = post_body.get('description')
+  )
+  db.session.add(event)
+  db.session.commit()
+  return json.dumps({'success': True, 'data': event.serialize()}), 200
 
 # LUCY: Repurpose to support events
-@app.route('/api/post/<int:post_id>/')
-def get_post(post_id):
-  """Retrieve specific post in post list."""
-  post = Post.query.filter_by(id=post_id).first() 
-  if post is not None:
-    return json.dumps({'success': True, 'data': post.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Post not found!'}), 404
+# @app.route('/api/post/<int:post_id>/')
+# def get_post(post_id):
+#   """Retrieve specific post in post list."""
+#   post = Post.query.filter_by(id=post_id).first() 
+#   if post is not None:
+#     return json.dumps({'success': True, 'data': post.serialize()}), 200
+#   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
 # LUCY: Repurpose to support events
-@app.route('/api/post/<int:post_id>/', methods=['POST'])
-def edit_post(post_id):
-  """Update specific post with new post"""
-  post_body = json.loads(request.data)
-  if 'text' not in post_body:
-    return json.dumps({'success': False, 'error': 'Invalid POST body!'}), 404
-  post = Post.query.filter_by(id=post_id).first()
-  if post is not None:
-    post.text = post_body.get('text', post.text)
-    db.session.commit()
-    return json.dumps({'success': True, 'data': post.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Post not found!'}), 404
+# @app.route('/api/post/<int:post_id>/', methods=['POST'])
+# def edit_post(post_id):
+#   """Update specific post with new post"""
+#   post_body = json.loads(request.data)
+#   if 'text' not in post_body:
+#     return json.dumps({'success': False, 'error': 'Invalid POST body!'}), 404
+#   post = Post.query.filter_by(id=post_id).first()
+#   if post is not None:
+#     post.text = post_body.get('text', post.text)
+#     db.session.commit()
+#     return json.dumps({'success': True, 'data': post.serialize()}), 200
+#   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
 # LUCY: Repurpose to support events
-@app.route('/api/post/<int:post_id>/', methods=['DELETE'])
-def delete_post(post_id):
-  """Remove specific post in post list."""
-  post = Post.query.filter_by(id=post_id).first() 
-  if post is not None:
-    db.session.delete(post)
-    db.session.commit()
-    return json.dumps({'success': True, 'data': post.serialize()}), 200
-  return json.dumps({'success': False, 'error': 'Post not found!'}), 404 
+# @app.route('/api/post/<int:post_id>/', methods=['DELETE'])
+# def delete_post(post_id):
+#   """Remove specific post in post list."""
+#   post = Post.query.filter_by(id=post_id).first() 
+#   if post is not None:
+#     db.session.delete(post)
+#     db.session.commit()
+#     return json.dumps({'success': True, 'data': post.serialize()}), 200
+#   return json.dumps({'success': False, 'error': 'Post not found!'}), 404 
 
 # LUCY: Need this for supporting users. Revisit details later.
 @app.route('/register/', methods=['POST'])
@@ -100,11 +92,13 @@ def register_account():
     post_body = json.loads(request.data)
     email = post_body.get('email')
     password = post_body.get('password')
+    first_name = post_body.get('first_name')
+    last_name = post_body.get('last_name')
 
-    if email is None or password is None:
-        return json.dumps({'error': 'Invalid email or password'})
+    if email is None or password is None or first_name is None or last_name is None:
+        return json.dumps({'error': 'Invalid field'})
 
-    created, user = users_dao.create_user(email, password)
+    created, user = users_dao.create_user(email, password, first_name, last_name)
 
     if not created:
         return json.dumps({'error': 'User already exists.'})
@@ -113,8 +107,11 @@ def register_account():
         'session_token': user.session_token,
         'session_expiration': str(user.session_expiration),
         'update_token': user.update_token,
-        'user_id': user.id,
-        'photo_id': user.id%5
+        'user': {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email 
+        }
     })
 
 # LUCY: Need this for supporting users. Revisit details later.
@@ -136,8 +133,11 @@ def login():
         'session_token': user.session_token,
         'session_expiration': str(user.session_expiration),
         'update_token': user.update_token,
-        'user_id': user.id,
-        'photo_id': user.id%5
+        'user': {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email 
+        }
     })
 
 # LUCY: Need this for supporting users. Revisit details later.
@@ -157,8 +157,11 @@ def update_session():
         'session_token': user.session_token,
         'session_expiration': str(user.session_expiration),
         'update_token': user.update_token,
-        'user_id': user.id,
-        'photo_id': user.id%5
+        'user': {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email 
+        }
     })
 
 # LUCY: Need this for supporting users. Revisit details later.
