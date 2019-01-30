@@ -4,7 +4,7 @@ from flask import Flask, request
 
 import users_dao
 
-db_filename = "signin2.db"
+db_filename = "signin.db"
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_filename
@@ -15,30 +15,19 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
-    
-# LUCY: Need this for supporting users. Revisit details later.
-def extract_token(request):
-  auth_header = request.headers.get('Authorization')
-  if auth_header is None:
-      return False, json.dumps({'error': 'Missing authorization header.'})
-
-  # Header looks like "Authorization: Bearer <session token>"
-  bearer_token = auth_header.replace('Bearer ', '').strip()
-  if bearer_token is None or not bearer_token:
-      return False, json.dumps({'error': 'Invalid authorization header.'})
-
-  return True, bearer_token
 
 @app.route('/')
 def hello():
   return 'Hello World!'
 
+# get all events - works!
 @app.route('/api/events/')
 def get_events():
   events = Event.query.all()
   res = {'success': True, 'data': [event.serialize() for event in events]}
   return json.dumps(res), 200
 
+# creating a new event - works
 @app.route('/api/events/', methods=['POST'])
 def create_event():
   post_body = json.loads(request.data)
@@ -46,47 +35,49 @@ def create_event():
     event = post_body.get('event'),
     club = post_body.get('club'),
     location = post_body.get('location'),
-    description = post_body.get('description')
+    description = post_body.get('description'),
+    event_creator = post_body.get('event_creator')
   )
+  creator_id = post_body.get('event_creator')
+  creator = User.query.filter_by(id=creator_id).first()
+  creator.created_events.append(event)
   db.session.add(event)
   db.session.commit()
   return json.dumps({'success': True, 'data': event.serialize()}), 200
 
-# LUCY: Repurpose to support events
-# @app.route('/api/post/<int:post_id>/')
-# def get_post(post_id):
-#   """Retrieve specific post in post list."""
-#   post = Post.query.filter_by(id=post_id).first() 
-#   if post is not None:
-#     return json.dumps({'success': True, 'data': post.serialize()}), 200
-#   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
+# LUCY: Repurpose to support events - works!
+@app.route('/api/<int:user_id>/events/')
+def get_user_events(user_id):
+  user = User.query.filter_by(id=user_id).first() 
+  if user is not None:
+    events = [event.serialize() for event in user.created_events]
+    return json.dumps({'success': True, 'data': events}), 200
+  return json.dumps({'success': False, 'error': 'User not found!'}), 404
 
-# LUCY: Repurpose to support events
-# @app.route('/api/post/<int:post_id>/', methods=['POST'])
-# def edit_post(post_id):
-#   """Update specific post with new post"""
-#   post_body = json.loads(request.data)
-#   if 'text' not in post_body:
-#     return json.dumps({'success': False, 'error': 'Invalid POST body!'}), 404
-#   post = Post.query.filter_by(id=post_id).first()
-#   if post is not None:
-#     post.text = post_body.get('text', post.text)
-#     db.session.commit()
-#     return json.dumps({'success': True, 'data': post.serialize()}), 200
-#   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
+# does not work! 
+@app.route('/api/event/<int:event_id>/signin/', methods=['POST'])
+def signin_event(event_id):
+  post_body = json.loads(request.data)
+  event = Event.query.filter_by(id=event_id).first()
+  user_id = post_body.get('user_id')
+  user = User.query.filter_by(id=user_id).first()
+  if event is not None:
+    event.attendees.append(user)
+    db.session.commit()
+    return json.dumps({'success': True, 'data': event.serialize()}), 200
+  return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
-# LUCY: Repurpose to support events
-# @app.route('/api/post/<int:post_id>/', methods=['DELETE'])
-# def delete_post(post_id):
-#   """Remove specific post in post list."""
-#   post = Post.query.filter_by(id=post_id).first() 
-#   if post is not None:
-#     db.session.delete(post)
-#     db.session.commit()
-#     return json.dumps({'success': True, 'data': post.serialize()}), 200
-#   return json.dumps({'success': False, 'error': 'Post not found!'}), 404 
+# does not work!
+@app.route('/api/event/<int:event_id>/attendees/')
+def get_event_attendees(event_id):
+  event = Event.query.filter_by(id=event_id).first() 
+  if event is not None:
+    users = [user.serialize() for user in event.attendees]
+    db.session.commit()
+    return json.dumps({'success': True, 'data': users}), 200
+  return json.dumps({'success': False, 'error': 'Event not found!'}), 404 
 
-# LUCY: Need this for supporting users. Revisit details later.
+# works!
 @app.route('/register/', methods=['POST'])
 def register_account():
     post_body = json.loads(request.data)
@@ -110,7 +101,8 @@ def register_account():
         'user': {
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'email': user.email 
+            'email': user.email,
+            'id': user.id
         }
     })
 
@@ -136,7 +128,8 @@ def login():
         'user': {
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'email': user.email 
+            'email': user.email, 
+            'id': user.id
         }
     })
 
@@ -160,7 +153,8 @@ def update_session():
         'user': {
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'email': user.email 
+            'email': user.email,
+            'id': user.id
         }
     })
 
@@ -180,3 +174,14 @@ def secret_message():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+def extract_token(request):
+  auth_header = request.headers.get('Authorization')
+  if auth_header is None:
+      return False, json.dumps({'error': 'Missing authorization header.'})
+
+  bearer_token = auth_header.replace('Bearer ', '').strip()
+  if bearer_token is None or not bearer_token:
+      return False, json.dumps({'error': 'Invalid authorization header.'})
+
+  return True, bearer_token

@@ -6,6 +6,11 @@ import os
 
 db = SQLAlchemy()
 
+event_user_table = db.Table('event_user_association',
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 class Event(db.Model):
     __tablename__ = 'event'
     id = db.Column(db.Integer, primary_key=True)
@@ -13,12 +18,15 @@ class Event(db.Model):
     club = db.Column(db.String, nullable=False)
     location = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
+    event_creator = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    attendees = db.relationship('User', cascade='delete', secondary=event_user_table)
 
     def __init__(self, **kwargs):
         self.event = kwargs.get('event', '')
         self.club = kwargs.get('club', '')
         self.location = kwargs.get('location', '')
         self.description = kwargs.get('description', '')
+        self.event_creator = kwargs.get('event_creator')
         
     def serialize(self):
         return {
@@ -26,7 +34,8 @@ class Event(db.Model):
             'event': self.event,
             'club': self.club,
             'location': self.location,
-            'description': self.description
+            'description': self.description,
+            'event_creator': self.event_creator
         }
 
 # LUCY: Keep User table for Sign Ins (revisit details later)
@@ -38,6 +47,7 @@ class User(db.Model):
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
+    created_events = db.relationship('Event', cascade='delete', secondary=event_user_table)
     password_digest = db.Column(db.String, nullable=False)
 
     # Session information
@@ -52,6 +62,14 @@ class User(db.Model):
         self.password_digest = bcrypt.hashpw(kwargs.get('password').encode('utf8'),
                                             bcrypt.gensalt(rounds=13))
         self.renew_session()
+
+    def serialize(self):
+        return {
+            'last_name': self.last_name,
+            'first_name': self.first_name,
+            'email': self.email,
+            'id': self.id
+        }
 
     # Used to randomly generate session/update tokens
     def _urlsafe_base_64(self):
