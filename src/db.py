@@ -18,6 +18,7 @@ class Event(db.Model):
     club = db.Column(db.String, nullable=False)
     location = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
+    photo = db.Column(db.String, nullable=False)
     event_creator = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     attendees = db.relationship('User', cascade='delete', secondary=event_user_table)
 
@@ -27,6 +28,7 @@ class Event(db.Model):
         self.location = kwargs.get('location', '')
         self.description = kwargs.get('description', '')
         self.event_creator = kwargs.get('event_creator')
+        self.photo = kwargs.get('photo', '')
         
     def serialize(self):
         return {
@@ -35,7 +37,8 @@ class Event(db.Model):
             'club': self.club,
             'location': self.location,
             'description': self.description,
-            'event_creator': self.event_creator
+            'event_creator': self.event_creator,
+            'photo': self.photo
         }
 
 # LUCY: Keep User table for Sign Ins (revisit details later)

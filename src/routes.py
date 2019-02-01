@@ -36,7 +36,8 @@ def create_event():
     club = post_body.get('club'),
     location = post_body.get('location'),
     description = post_body.get('description'),
-    event_creator = post_body.get('event_creator')
+    event_creator = post_body.get('event_creator'),
+    photo = post_body.get('photo')
   )
   creator_id = post_body.get('event_creator')
   creator = User.query.filter_by(id=creator_id).first()
@@ -54,7 +55,7 @@ def get_user_events(user_id):
     return json.dumps({'success': True, 'data': events}), 200
   return json.dumps({'success': False, 'error': 'User not found!'}), 404
 
-# does not work! 
+# works! 
 @app.route('/api/event/<int:event_id>/signin/', methods=['POST'])
 def signin_event(event_id):
   post_body = json.loads(request.data)
@@ -67,7 +68,7 @@ def signin_event(event_id):
     return json.dumps({'success': True, 'data': event.serialize()}), 200
   return json.dumps({'success': False, 'error': 'Post not found!'}), 404
 
-# does not work!
+# works!
 @app.route('/api/event/<int:event_id>/attendees/')
 def get_event_attendees(event_id):
   event = Event.query.filter_by(id=event_id).first() 
